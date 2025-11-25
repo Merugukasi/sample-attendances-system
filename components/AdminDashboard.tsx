@@ -17,7 +17,7 @@ interface AdminDashboardProps {
 const AdminDashboard: React.FC<AdminDashboardProps> = ({
   students, courses, assignments, attendance, setStudents, setCourses, setAssignments, onLogout
 }) => {
-  const [activeTab, setActiveTab] = useState<'students' | 'course_struct' | 'attendance'>('students');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'students' | 'course_struct' | 'attendance'>('dashboard');
   const [manageSubTab, setManageSubTab] = useState<'assignments' | 'library'>('assignments');
   const [loadingAI, setLoadingAI] = useState(false);
 
@@ -352,34 +352,206 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }).sort((a, b) => a.rollNo.localeCompare(b.rollNo));
   }, [viewSessionDate, histSubjectId, attendance, historyStudents]);
 
+  // --- DASHBOARD METRICS ---
+  const studentsPerDept = useMemo(() => {
+    const counts: Record<string, number> = {};
+    students.forEach(s => {
+      counts[s.department] = (counts[s.department] || 0) + 1;
+    });
+    return Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  }, [students]);
+
 
   const degreeOptions = DEGREES.map(d => ({ value: d, label: d }));
   const deptOptions = DEPARTMENTS.map(d => ({ value: d, label: d }));
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <header className="bg-indigo-800 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
-            Admin Console
-          </h1>
-          <Button variant="danger" onClick={onLogout} className="text-sm">Logout</Button>
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <aside className="bg-indigo-900 text-white w-full md:w-72 flex-shrink-0 flex flex-col transition-all duration-300 shadow-xl z-20">
+        <div className="p-6 border-b border-indigo-800">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-600 rounded-lg shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold tracking-tight">UniTrack</h1>
+                <p className="text-indigo-300 text-xs">Admin Console</p>
+              </div>
+            </div>
         </div>
-        <nav className="max-w-7xl mx-auto px-4 mt-4 flex gap-4 text-sm font-medium overflow-x-auto">
-          <button onClick={() => setActiveTab('students')} className={`pb-3 px-2 border-b-2 whitespace-nowrap ${activeTab === 'students' ? 'border-white text-white' : 'border-transparent text-indigo-200 hover:text-white'}`}>Students</button>
-          <button onClick={() => setActiveTab('course_struct')} className={`pb-3 px-2 border-b-2 whitespace-nowrap ${activeTab === 'course_struct' ? 'border-white text-white' : 'border-transparent text-indigo-200 hover:text-white'}`}>Manage Subjects</button>
-          <button onClick={() => setActiveTab('attendance')} className={`pb-3 px-2 border-b-2 whitespace-nowrap ${activeTab === 'attendance' ? 'border-white text-white' : 'border-transparent text-indigo-200 hover:text-white'}`}>Attendance History</button>
-        </nav>
-      </header>
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 py-8 w-full">
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <button 
+            onClick={() => setActiveTab('dashboard')} 
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
+              activeTab === 'dashboard' 
+                ? 'bg-indigo-600 text-white shadow-md' 
+                : 'text-indigo-200 hover:bg-indigo-800 hover:text-white'
+            }`}
+          >
+            <svg className={`w-5 h-5 ${activeTab === 'dashboard' ? 'text-white' : 'text-indigo-300 group-hover:text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            <span className="font-medium">Dashboard</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('students')} 
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
+              activeTab === 'students' 
+                ? 'bg-indigo-600 text-white shadow-md' 
+                : 'text-indigo-200 hover:bg-indigo-800 hover:text-white'
+            }`}
+          >
+            <svg className={`w-5 h-5 ${activeTab === 'students' ? 'text-white' : 'text-indigo-300 group-hover:text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <span className="font-medium">Students</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('course_struct')} 
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
+              activeTab === 'course_struct' 
+                ? 'bg-indigo-600 text-white shadow-md' 
+                : 'text-indigo-200 hover:bg-indigo-800 hover:text-white'
+            }`}
+          >
+            <svg className={`w-5 h-5 ${activeTab === 'course_struct' ? 'text-white' : 'text-indigo-300 group-hover:text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <span className="font-medium">Manage Subjects</span>
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('attendance')} 
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
+              activeTab === 'attendance' 
+                ? 'bg-indigo-600 text-white shadow-md' 
+                : 'text-indigo-200 hover:bg-indigo-800 hover:text-white'
+            }`}
+          >
+            <svg className={`w-5 h-5 ${activeTab === 'attendance' ? 'text-white' : 'text-indigo-300 group-hover:text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+            <span className="font-medium">Attendance History</span>
+          </button>
+        </nav>
+
+        <div className="p-4 border-t border-indigo-800">
+          <button 
+            onClick={onLogout} 
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-200 hover:bg-red-900/50 hover:text-red-200 transition-colors group"
+          >
+            <svg className="w-5 h-5 group-hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            <span className="font-medium">Logout</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 min-w-0 overflow-y-auto h-screen">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
+           <header className="mb-8 pb-6 border-b border-gray-200">
+              <h2 className="text-3xl font-bold text-gray-900">
+                 {activeTab === 'dashboard' && 'Dashboard Overview'}
+                 {activeTab === 'students' && 'Student Management'}
+                 {activeTab === 'course_struct' && 'Subject Configuration'}
+                 {activeTab === 'attendance' && 'Attendance Reports'}
+              </h2>
+              <p className="text-gray-500 mt-2">
+                 {activeTab === 'dashboard' && 'Welcome back! Here is a summary of your institution\'s status.'}
+                 {activeTab === 'students' && 'Register students, manage profiles, and assign Class Representatives.'}
+                 {activeTab === 'course_struct' && 'Manage the global subject library and assign subjects to specific classes.'}
+                 {activeTab === 'attendance' && 'View detailed attendance analytics and session history.'}
+              </p>
+           </header>
         
+        {/* Dashboard Tab */}
+        {activeTab === 'dashboard' && (
+          <div className="space-y-6">
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Card 1: Total Students */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center transition-transform hover:scale-105 duration-200">
+                    <div className="p-4 rounded-full bg-indigo-100 text-indigo-600 mr-5">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Students</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{students.length}</p>
+                    </div>
+                </div>
+                
+                {/* Card 2: Total Courses */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center transition-transform hover:scale-105 duration-200">
+                    <div className="p-4 rounded-full bg-blue-100 text-blue-600 mr-5">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Subjects</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{courses.length}</p>
+                    </div>
+                </div>
+
+                {/* Card 3: Departments */}
+                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center transition-transform hover:scale-105 duration-200">
+                    <div className="p-4 rounded-full bg-green-100 text-green-600 mr-5">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Departments</p>
+                        <p className="text-3xl font-bold text-gray-900 mt-1">{DEPARTMENTS.length}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* Distribution Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card title="Student Distribution by Department">
+                    {studentsPerDept.length > 0 ? (
+                        <div className="space-y-5">
+                            {studentsPerDept.slice(0, 5).map(([dept, count]) => (
+                                <div key={dept}>
+                                    <div className="flex justify-between text-sm mb-1">
+                                        <span className="text-gray-700 font-medium">{dept}</span>
+                                        <span className="font-bold text-gray-900">{count}</span>
+                                    </div>
+                                     <div className="w-full bg-gray-100 rounded-full h-2.5">
+                                        <div className="bg-indigo-600 h-2.5 rounded-full" style={{ width: `${(count / students.length) * 100}%` }}></div>
+                                     </div>
+                                </div>
+                            ))}
+                            {studentsPerDept.length > 5 && (
+                                <p className="text-xs text-center text-gray-500 mt-4">+ {studentsPerDept.length - 5} more departments with fewer students</p>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 text-gray-400">
+                          <p>No student data available.</p>
+                          <button onClick={() => setActiveTab('students')} className="text-indigo-600 text-sm mt-2 hover:underline">Go to Students tab</button>
+                        </div>
+                    )}
+                </Card>
+
+                {/* Quick Actions */}
+                 <Card title="Quick Actions">
+                    <div className="grid grid-cols-2 gap-4 h-full">
+                        <button onClick={() => setActiveTab('students')} className="flex flex-col items-center justify-center p-6 border border-gray-100 rounded-xl hover:bg-indigo-50 hover:border-indigo-100 transition-all group">
+                             <div className="w-12 h-12 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+                             </div>
+                             <span className="text-base font-semibold text-gray-900">Add New Student</span>
+                        </button>
+                         <button onClick={() => { setActiveTab('course_struct'); setManageSubTab('library'); }} className="flex flex-col items-center justify-center p-6 border border-gray-100 rounded-xl hover:bg-blue-50 hover:border-blue-100 transition-all group">
+                             <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-3 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+                             </div>
+                             <span className="text-base font-semibold text-gray-900">Add New Subject</span>
+                        </button>
+                    </div>
+                </Card>
+            </div>
+          </div>
+        )}
+
         {/* Students Management */}
         {activeTab === 'students' && (
-          <div className="grid lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-1">
+          <div className="grid xl:grid-cols-3 gap-8">
+            <div className="xl:col-span-1">
               <Card title={editingStudentId ? "Edit Student" : "Add New Student"}>
                 <form onSubmit={handleAddStudent}>
                   <Input 
@@ -497,7 +669,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </form>
               </Card>
             </div>
-            <div className="lg:col-span-2">
+            <div className="xl:col-span-2">
               <Card title={`Registered Students (${students.length})`}>
                 <div className="overflow-x-auto">
                   <table className="min-w-full divide-y divide-gray-200">
@@ -575,8 +747,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             {/* Class Assignments View */}
             {manageSubTab === 'assignments' && (
-              <div className="grid lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1">
+              <div className="grid xl:grid-cols-3 gap-8">
+                <div className="xl:col-span-1">
                   <Card title="Assign Subjects to Class">
                     <div className="mb-6 p-4 bg-indigo-50 rounded-lg border border-indigo-100">
                       <h3 className="text-sm font-semibold text-indigo-800 mb-3">1. Select Target Class</h3>
@@ -683,7 +855,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </div>
                   </Card>
                 </div>
-                <div className="lg:col-span-2 space-y-6">
+                <div className="xl:col-span-2 space-y-6">
                   {Object.keys(groupedAssignments).length === 0 ? (
                     <div className="text-center py-12 bg-white rounded-lg border-2 border-dashed border-gray-200 text-gray-500">
                       <h3 className="text-lg font-medium text-gray-900 mb-2">No Subjects Assigned</h3>
@@ -737,8 +909,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
             {/* Subject Library View (CRUD) */}
             {manageSubTab === 'library' && (
-              <div className="grid lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-1">
+              <div className="grid xl:grid-cols-3 gap-8">
+                <div className="xl:col-span-1">
                   <Card title={editingCourseId ? "Edit Subject" : "Add New Subject"}>
                     <form onSubmit={handleAddCourse}>
                       <Input 
@@ -772,7 +944,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   </div>
                 </div>
 
-                <div className="lg:col-span-2">
+                <div className="xl:col-span-2">
                   <Card title={`Global Subject Library (${courses.length})`}>
                     <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
                       <table className="min-w-full divide-y divide-gray-200">
@@ -1099,6 +1271,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
             </div>
         )}
+        </div>
       </main>
     </div>
   );

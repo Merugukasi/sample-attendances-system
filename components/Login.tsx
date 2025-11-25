@@ -186,8 +186,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, students, onPasswordReset }) => 
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 p-4">
-      <Card className="w-full max-w-md bg-white/95 backdrop-blur-sm shadow-2xl">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 bg-cover bg-center relative"
+      style={{
+        backgroundImage: 'url("https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2586&auto=format&fit=crop")'
+      }}
+    >
+      {/* Dark Overlay */}
+      <div className="absolute inset-0 bg-indigo-900/60 backdrop-blur-sm"></div>
+      
+      <Card className="w-full max-w-md bg-white/95 backdrop-blur-md shadow-2xl relative z-10">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">UniTrack</h1>
           <p className="text-gray-500">Attendance Management System</p>
