@@ -149,49 +149,86 @@ const CRDashboard: React.FC<CRDashboardProps> = ({
 
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-indigo-600 text-white shadow-lg sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-bold">CR Dashboard</h1>
-            <p className="text-xs text-indigo-200">
-              {currentUser.name} | {currentUser.degree} - {currentUser.department} - Y{currentUser.year}/S{currentUser.semester}
-            </p>
-          </div>
-          <Button variant="secondary" onClick={onLogout} className="text-sm">Logout</Button>
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <aside className="bg-indigo-900 text-white w-full md:w-72 flex-shrink-0 flex flex-col transition-all duration-300 shadow-xl z-20">
+        <div className="p-6 border-b border-indigo-800">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-600 rounded-lg shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold tracking-tight">UniTrack</h1>
+                <p className="text-indigo-300 text-xs">CR Portal</p>
+              </div>
+            </div>
+            <div className="mt-4 pt-4 border-t border-indigo-800/50">
+               <p className="text-sm font-medium text-white">{currentUser.name}</p>
+               <p className="text-xs text-indigo-300 mt-0.5">
+                  {currentUser.degree} • {currentUser.department}
+               </p>
+               <p className="text-xs text-indigo-400 mt-0.5">
+                  Year {currentUser.year} • Sem {currentUser.semester}
+               </p>
+            </div>
         </div>
-      </header>
 
-      <main className="flex-1 max-w-7xl mx-auto px-4 py-6 w-full">
-        
-        {/* View Switcher */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white p-1 rounded-lg border border-gray-200 shadow-sm inline-flex">
-            <button 
-              onClick={() => { setViewMode('mark'); setHistorySubjectId(null); }} 
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewMode === 'mark' ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-            >
-              Mark Attendance
-            </button>
-            <button 
-              onClick={() => { setViewMode('history'); setSelectedCourseId(null); setInsight(null); }} 
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${viewMode === 'history' ? 'bg-indigo-50 text-indigo-700 shadow-sm' : 'text-gray-500 hover:text-gray-900'}`}
-            >
-              View History
-            </button>
-          </div>
+        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+          <button 
+            onClick={() => { setViewMode('mark'); setHistorySubjectId(null); }} 
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
+              viewMode === 'mark' 
+                ? 'bg-indigo-600 text-white shadow-md' 
+                : 'text-indigo-200 hover:bg-indigo-800 hover:text-white'
+            }`}
+          >
+            <svg className={`w-5 h-5 ${viewMode === 'mark' ? 'text-white' : 'text-indigo-300 group-hover:text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span className="font-medium">Mark Attendance</span>
+          </button>
+
+          <button 
+            onClick={() => { setViewMode('history'); setSelectedCourseId(null); setInsight(null); }} 
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${
+              viewMode === 'history' 
+                ? 'bg-indigo-600 text-white shadow-md' 
+                : 'text-indigo-200 hover:bg-indigo-800 hover:text-white'
+            }`}
+          >
+            <svg className={`w-5 h-5 ${viewMode === 'history' ? 'text-white' : 'text-indigo-300 group-hover:text-white'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span className="font-medium">View History</span>
+          </button>
+        </nav>
+
+        <div className="p-4 border-t border-indigo-800">
+          <button 
+            onClick={onLogout} 
+            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-indigo-200 hover:bg-red-900/50 hover:text-red-200 transition-colors group"
+          >
+            <svg className="w-5 h-5 group-hover:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+            <span className="font-medium">Logout</span>
+          </button>
         </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 min-w-0 overflow-y-auto h-screen">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto w-full">
+            <header className="mb-8 pb-6 border-b border-gray-200">
+              <h2 className="text-3xl font-bold text-gray-900">
+                 {viewMode === 'mark' ? 'Mark Attendance' : 'Attendance Reports'}
+              </h2>
+              <p className="text-gray-500 mt-2">
+                 {viewMode === 'mark' 
+                    ? 'Select a subject below to record today\'s attendance for your class.' 
+                    : 'View past attendance records, session details, and student statistics.'}
+              </p>
+           </header>
 
         {/* ================= MODE: MARK ATTENDANCE ================= */}
         {viewMode === 'mark' && (
           <>
             {!selectedCourseId ? (
               <div>
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-gray-800">Your Subjects</h2>
-                  <p className="text-gray-500 text-sm">Select a subject below to mark attendance for your class.</p>
-                </div>
-                
                 {myCourses.length === 0 ? (
                   <div className="text-center py-12 text-gray-500 bg-white rounded-lg border-2 border-dashed border-gray-300">
                     <p>No courses assigned to your schedule ({currentUser.degree} - {currentUser.department} - Y{currentUser.year}/S{currentUser.semester}).</p>
@@ -319,11 +356,6 @@ const CRDashboard: React.FC<CRDashboardProps> = ({
            <>
              {!historySubjectId ? (
                 <div>
-                  <div className="mb-6">
-                    <h2 className="text-xl font-semibold text-gray-800">Attendance History</h2>
-                    <p className="text-gray-500 text-sm">Select a subject to view attendance reports and past sessions.</p>
-                  </div>
-
                   {myCourses.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">No subjects assigned.</div>
                   ) : (
@@ -541,6 +573,7 @@ const CRDashboard: React.FC<CRDashboardProps> = ({
                 </div>
             </div>
         )}
+        </div>
       </main>
     </div>
   );
